@@ -1,0 +1,253 @@
+---
+title: "Assignment 1"
+output: html_document
+date: '2022-04-27'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(magrittr)
+library(gRim)
+```
+
+# Download and prepare data
+
+This Dataset has been taken from Kaggle, which is an open source platform where data Scientist and other developers are engaged into running machine learning contests, write and share code, and to host datasets.
+
+Specifically, this dataset is called [Bank Marketing Dataset](https://www.kaggle.com/datasets/janiobachmann/bank-marketing-dataset?resource=download) and its aim is to develop effective marketing campaigns for banks. Therefore, this dataset includes relevant information about a financial institution and it is made to analyze and find ways to look for future strategies.
+
+```{r}
+bank=read.csv("bank.csv")
+names(bank)
+```
+
+As we can see this dataset contains 17 variables. It includes binary variables, categorical with several factors and continuous ones. However, as we want to apply a log linear model, we are only going to keep the binary variables.
+
+```{r}
+reduced_bank=bank[,c(5,7,8,17)]
+head(reduced_bank,3)
+```
+
+After this variable reduction, we will be working with 4 binary variables with labels "yes" and "no".
+
+- Default: Indicates if it has missed payments
+- Housing: Whether the individual owns a house or not.
+- Loan: If it has a loan
+- Deposit: Indicates if it has a deposit or not.
+
+Once we have our dataset clear, we can start building the contingency table
+
+```{r}
+data_bank=table(reduced_bank)%>% as.data.frame()
+back_bank=xtabs(Freq~.,data=data_bank)
+head(data_bank)
+```
+
+# Graphical Log-linear models
+
+```{r}
+m1=dmod(~default*housing*loan*deposit,data=back_bank)
+m1
+```
+
+```{r}
+m2=dmod(~default*housing*loan+default*loan*deposit+defaul*housing*deposit+housing*loan*deposit,data=back_bank)
+m2
+```
+
+```{r}
+m3=dmod(~default*housing*loan+default*loan*deposit+defaul*housing*deposit,data=back_bank)
+m3
+```
+
+```{r}
+m4=dmod(~default*housing*loan+default*loan*deposit+housing*loan*deposit,data=back_bank)
+m4
+```
+
+```{r}
+m5=dmod(~default*housing*loan+defaul*housing*deposit+housing*loan*deposit,data=back_bank)
+plot(m5)
+```
+
+```{r}
+m6=dmod(~default*loan*deposit+defaul*housing*deposit+housing*loan*deposit,data=back_bank)
+plot(m6)
+```
+
+```{r}
+m7=dmod(~defaul*housing*deposit+housing*loan*deposit,data=back_bank)
+plot(m7)
+```
+
+
+```{r}
+m8=dmod(~default*housing*loan+default*loan*deposit,data=back_bank)
+plot(m8)
+```
+
+```{r}
+m9=dmod(~default*housing*loan+housing*loan*deposit,data=back_bank)
+plot(m9)
+```
+
+```{r}
+m10=dmod(~default*housing+default*loan+default*deposit+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+plot(m10)
+```
+
+```{r}
+m11=dmod(~default*loan+default*deposit+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+plot(m11)
+```
+
+```{r}
+m12=dmod(~default*housing+default*deposit+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+plot(m12)
+```
+
+```{r}
+m13=dmod(~default*housing+default*loan+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+plot(m13)
+```
+
+```{r}
+m14=dmod(~default+housing*loan*deposit,data=back_bank)
+plot(m14)
+```
+
+
+```{r}
+m15=dmod(~housing+default*loan*deposit,data=back_bank)
+plot(m15)
+```
+
+```{r}
+m16=dmod(~loan+default*housing*deposit,data=back_bank)
+plot(m16)
+```
+
+```{r}
+m17=dmod(~deposit+default*housing*loan,data=back_bank)
+plot(m17)
+```
+
+```{r}
+m18=dmod(~default*loan+default*deposit+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+plot(m18)
+```
+
+```{r}
+m19=dmod(~default*housing+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+plot(m19)
+```
+
+```{r}
+m20=dmod(~default+housing+loan+deposit,data=back_bank)
+plot(m20)
+```
+
+
+
+
+```{r}
+Aic=c(m1$fitinfo$aic,m2$fitinfo$aic,m3$fitinfo$aic,m4$fitinfo$aic,m5$fitinfo$aic,m6$fitinfo$aic,m7$fitinfo$aic,m8$fitinfo$aic,m9$fitinfo$aic,m10$fitinfo$aic,m11$fitinfo$aic,m12$fitinfo$aic,m13$fitinfo$aic,m14$fitinfo$aic,m15$fitinfo$aic,m16$fitinfo$aic,m17$fitinfo$aic,m18$fitinfo$aic,m19$fitinfo$aic,m20$fitinfo$aic)
+
+Bic=c(m1$fitinfo$bic,m2$fitinfo$bic,m3$fitinfo$bic,m4$fitinfo$bic,m5$fitinfo$bic,m6$fitinfo$bic,m7$fitinfo$bic,m8$fitinfo$bic,m9$fitinfo$bic,m10$fitinfo$bic,m11$fitinfo$bic,m12$fitinfo$bic,m13$fitinfo$bic,m14$fitinfo$bic,m15$fitinfo$bic,m16$fitinfo$bic,m17$fitinfo$bic,m18$fitinfo$bic,m19$fitinfo$bic,m20$fitinfo$bic)
+
+logL=c(m1$fitinfo$logL,m2$fitinfo$logL,m3$fitinfo$logL,m4$fitinfo$logL,m5$fitinfo$logL,m6$fitinfo$logL,m7$fitinfo$logL,m8$fitinfo$logL,m9$fitinfo$logL,m10$fitinfo$logL,m11$fitinfo$logL,m12$fitinfo$logL,m13$fitinfo$logL,m14$fitinfo$logL,m15$fitinfo$logL,m16$fitinfo$logL,m17$fitinfo$logL,m18$fitinfo$logL,m19$fitinfo$logL,m20$fitinfo$logL)
+
+resume=data.frame(logL,Aic,Bic)
+which.min(resume$Aic)
+which.min(resume$Bic) 
+order(resume$Bic)
+```
+
+
+
+```{r}
+msat <- dmod(~.^.,data=back_bank)
+mbaic <- backward(msat)
+plot(mbaic)
+```
+
+```{r}
+mmain <- dmod(~.^1,data=back_bank)
+mfaic <- forward(mmain)
+plot(mfaic)
+```
+
+```{r}
+msat <- dmod(~.^.,data=back_bank)
+mbbic <- backward(msat,k=log(sum(back_bank)))
+plot(mbbic)
+mmain <- dmod(~.^1,data=back_bank)
+mfbic <- forward(mmain,k=log(sum(back_bank)))
+plot(mfbic)
+```
+
+
+```{r}
+mbaic$fitinfo$aic
+mfaic$fitinfo$aic
+mbbic$fitinfo$bic
+mfbic$fitinfo$bic
+```
+
+
+# Dependence graph of a log-linear model
+
+```{r}
+m1 <- dmod(~default*housing+housing*loan+loan*deposit,
+           data=data_bank) #2 way interactions
+plot(m1)
+summary(m1)
+```
+
+# Compare the dependence graphs of the full model and the model with only 2 way interactions.
+
+```{r}
+m2 <- dmod(~default*deposit+default*loan+default*housing+deposit*loan+deposit+loan*housing,data=bank) #2 way interactions 
+plot(m2)
+m3 <- dmod(~default*deposit*loan*housing,data=bank) #Full model
+plot(m3)
+```
+# Perform maximum likelihood estimation for the 2 way interactions model.
+
+```{r}
+c <- loglin(back_bank,margin=list(c(1,2), c(1,3), c(1,4),c(2,3),c(2,4),c(4,3)),fit=TRUE)
+c$fit
+```
+
+# Check if different models are graphical and decomposable.
+
+```{r}
+m1$modelinfo$properties
+m2$modelinfo$properties
+m3$modelinfo$properties
+```
+
+# Check RIP ordering.
+
+```{r}
+ug1 <- ug(~loan*deposit+deposit*default+default*housing)
+rip(ug1)
+```
+
+# Calculate AIC and BIC for different models
+
+```{r}
+dmod(~.^.,data=data_bank)
+dmod(~deposit*loan+deposit*housing+deposit*default+loan*housing+housing*default,data=data_bank)
+dmod(~deposit*loan+loan*housing,data=data_bank)
+dmod(~alcohol*tobacco+marijuana*alcohol,data=drug_use)
+dmod(~tobacco*marijuana+marijuana*alcohol,data=drug_use)
+dmod(~alcohol+tobacco*marijuana,data=drug_use)
+dmod(~tobacco+alcohol*marijuana,data=drug_use)
+dmod(~marijuana+alcohol*tobacco,data=drug_use)
+dmod(~alcohol+tobacco+marijuana,data=drug_use)
+```
+
+
+
