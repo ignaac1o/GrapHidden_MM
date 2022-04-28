@@ -47,12 +47,22 @@ head(data_bank)
 # Graphical Log-linear models
 
 ```{r}
-m1=dmod(~default*housing*loan*deposit,data=back_bank)
-plot(m1)
+mt=dmod(~default*housing*loan*deposit,data=back_bank)
+plot(mt)
 ```
 
 ```{r}
-m2=dmod(~defaul*housing*deposit+housing*loan*deposit,data=back_bank)
+m0=dmod(~default*housing*deposit+default*housing*loan,data=back_bank)
+plot(m0)
+```
+
+```{r}
+m1=dmod(~default*housing*deposit+default*loan*deposit,data=back_bank)
+plot(m2)
+```
+
+```{r}
+m2=dmod(~default*housing*deposit+housing*loan*deposit,data=back_bank)
 plot(m2)
 ```
 
