@@ -48,104 +48,162 @@ head(data_bank)
 
 ```{r}
 m1=dmod(~default*housing*loan*deposit,data=back_bank)
-m1
+plot(m1)
 ```
 
 ```{r}
-m2=dmod(~default*housing*loan+default*loan*deposit+defaul*housing*deposit+housing*loan*deposit,data=back_bank)
-m2
+m2=dmod(~defaul*housing*deposit+housing*loan*deposit,data=back_bank)
+plot(m2)
 ```
 
 ```{r}
-m3=dmod(~default*housing*loan+default*loan*deposit+defaul*housing*deposit,data=back_bank)
-m3
+m3=dmod(~default*housing+default*loan+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+plot(m3)
 ```
 
 ```{r}
-m4=dmod(~default*housing*loan+default*loan*deposit+housing*loan*deposit,data=back_bank)
-m4
+m4=dmod(~default*loan+default*deposit+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+plot(m4)
 ```
 
+
 ```{r}
-m5=dmod(~default*housing*loan+defaul*housing*deposit+housing*loan*deposit,data=back_bank)
+m5=dmod(~defaul*loan*deposit+housing*loan*default,data=back_bank)
 plot(m5)
 ```
 
+
 ```{r}
-m6=dmod(~default*loan*deposit+defaul*housing*deposit+housing*loan*deposit,data=back_bank)
+m6=dmod(~default*housing*loan+deposit,data=back_bank)
 plot(m6)
 ```
 
 ```{r}
-m7=dmod(~defaul*housing*deposit+housing*loan*deposit,data=back_bank)
+m7=dmod(~default*housing*deposit+loan,data=back_bank)
 plot(m7)
 ```
 
-
 ```{r}
-m8=dmod(~default*housing*loan+default*loan*deposit,data=back_bank)
+m8=dmod(~housing*loan*deposit+default,data=back_bank)
 plot(m8)
 ```
 
 ```{r}
-m9=dmod(~default*housing*loan+housing*loan*deposit,data=back_bank)
+m9=dmod(~default*loan*deposit+housing,data=back_bank)
 plot(m9)
 ```
 
 ```{r}
-m10=dmod(~default*housing+default*loan+default*deposit+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+m10=dmod(~default*housing+housing*loan+housing*deposit+deposit*loan,data=back_bank)
 plot(m10)
 ```
 
 ```{r}
-m11=dmod(~default*loan+default*deposit+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+m11=dmod(~housing*loan*deposit+default*loan,data=back_bank)
 plot(m11)
 ```
 
 ```{r}
-m12=dmod(~default*housing+default*deposit+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+m12=dmod(~housing*loan*deposit+default*deposit,data=back_bank)
 plot(m12)
 ```
 
+
 ```{r}
-m13=dmod(~default*housing+default*loan+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+m13=dmod(~default*housing*loan+deposit*default,data=back_bank)
 plot(m13)
 ```
 
 ```{r}
-m14=dmod(~default+housing*loan*deposit,data=back_bank)
+m14=dmod(~default*housing*loan+deposit*housing,data=back_bank)
 plot(m14)
 ```
 
-
 ```{r}
-m15=dmod(~housing+default*loan*deposit,data=back_bank)
+m15=dmod(~default*housing*loan+deposit*loan,data=back_bank)
 plot(m15)
 ```
 
 ```{r}
-m16=dmod(~loan+default*housing*deposit,data=back_bank)
+m16=dmod(~default*housing*deposit+loan*default,data=back_bank)
 plot(m16)
 ```
 
 ```{r}
-m17=dmod(~deposit+default*housing*loan,data=back_bank)
+m17=dmod(~default*housing*deposit+loan*deposit,data=back_bank)
 plot(m17)
 ```
 
 ```{r}
-m18=dmod(~default*loan+default*deposit+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+m18=dmod(~default*housing*deposit+loan*housing,data=back_bank)
 plot(m18)
 ```
 
 ```{r}
-m19=dmod(~default*housing+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+m19=dmod(~default*loan*deposit+housing*loan,data=back_bank)
 plot(m19)
 ```
 
 ```{r}
-m20=dmod(~default+housing+loan+deposit,data=back_bank)
+m20=dmod(~default*loan*deposit+housing*deposit,data=back_bank)
 plot(m20)
+```
+
+```{r}
+m21=dmod(~default*loan*deposit+housing*default,data=back_bank)
+plot(m21)
+```
+
+```{r}
+m22=dmod(~default*loan+deposit*housing,data=back_bank)
+plot(m22)
+```
+
+
+```{r}
+m23=dmod(~default*deposit+loan*housing,data=back_bank)
+plot(m23)
+```
+
+```{r}
+m24=dmod(~default*housing+deposit*loan,data=back_bank)
+plot(m24)
+```
+
+```{r}
+m25=dmod(~default*housing+loan+deposit,data=back_bank)
+plot(m25)
+```
+
+```{r}
+m26=dmod(~default*loan+housing+deposit,data=back_bank)
+plot(m26)
+```
+
+```{r}
+m27=dmod(~default*deposit+housing+loan,data=back_bank)
+plot(m27)
+```
+
+```{r}
+m28=dmod(~loan*housing+default+deposit,data=back_bank)
+plot(m28)
+```
+
+```{r}
+m29=dmod(~loan*deposit+housing+default,data=back_bank)
+plot(m29)
+```
+
+```{r}
+m30=dmod(~housing*deposit+loan+default,data=back_bank)
+plot(m30)
+```
+
+
+```{r}
+m31=dmod(~default+housing+loan+deposit,data=back_bank)
+plot(m31)
 ```
 
 
@@ -205,49 +263,6 @@ plot(m1)
 summary(m1)
 ```
 
-# Compare the dependence graphs of the full model and the model with only 2 way interactions.
-
-```{r}
-m2 <- dmod(~default*deposit+default*loan+default*housing+deposit*loan+deposit+loan*housing,data=bank) #2 way interactions 
-plot(m2)
-m3 <- dmod(~default*deposit*loan*housing,data=bank) #Full model
-plot(m3)
-```
-# Perform maximum likelihood estimation for the 2 way interactions model.
-
-```{r}
-c <- loglin(back_bank,margin=list(c(1,2), c(1,3), c(1,4),c(2,3),c(2,4),c(4,3)),fit=TRUE)
-c$fit
-```
-
-# Check if different models are graphical and decomposable.
-
-```{r}
-m1$modelinfo$properties
-m2$modelinfo$properties
-m3$modelinfo$properties
-```
-
-# Check RIP ordering.
-
-```{r}
-ug1 <- ug(~loan*deposit+deposit*default+default*housing)
-rip(ug1)
-```
-
-# Calculate AIC and BIC for different models
-
-```{r}
-dmod(~.^.,data=data_bank)
-dmod(~deposit*loan+deposit*housing+deposit*default+loan*housing+housing*default,data=data_bank)
-dmod(~deposit*loan+loan*housing,data=data_bank)
-dmod(~alcohol*tobacco+marijuana*alcohol,data=drug_use)
-dmod(~tobacco*marijuana+marijuana*alcohol,data=drug_use)
-dmod(~alcohol+tobacco*marijuana,data=drug_use)
-dmod(~tobacco+alcohol*marijuana,data=drug_use)
-dmod(~marijuana+alcohol*tobacco,data=drug_use)
-dmod(~alcohol+tobacco+marijuana,data=drug_use)
-```
 
 
 
