@@ -1,6 +1,7 @@
 ---
-title: "Assignment 1"
-output: html_document
+title: "Assignment 1: LogLinear graphical model"
+author: "Ignacio Almodóvar Cárdenas"
+output: pdf_document
 date: '2022-04-27'
 ---
 
@@ -32,11 +33,11 @@ head(reduced_bank,3)
 After this variable reduction, we will be working with 4 binary variables with labels "yes" and "no".
 
 - Default: Indicates if it has missed payments
-- Housing: Whether the individual owns a house or not.
+- Housing: Not very sure about this one but I will consider it as having a mortgage with the bank.
 - Loan: If it has a loan
 - Deposit: Indicates if it has a deposit or not.
 
-Once we have our dataset clear, we can start building the contingency table
+Once we have our dataset clear, we can start building the contingency and frequency tables.
 
 ```{r}
 data_bank=table(reduced_bank)%>% as.data.frame()
@@ -46,232 +47,193 @@ head(data_bank)
 
 # Graphical Log-linear models
 
-```{r}
+We are now going to try fitting a few different graphical log linear models to see the importance of the different dependencies between our categorical variables.
+
+First of all we are going to check the satured model.
+
+```{r,out.width="50%",fig.align='center'}
 mt=dmod(~default*housing*loan*deposit,data=back_bank)
+mt
 plot(mt)
 ```
 
-```{r}
-m0=dmod(~default*housing*deposit+default*housing*loan,data=back_bank)
-plot(m0)
+Within this plot we can see that all 4 nodes are connected between them, therefore there is a complete dependence between all the categorical variables. This makes total sense as all this nodes are like the steps you have to follow for getting a loan. When asking for a loan you will probably need to first have a deposit and same for applying for a mortgage. In some of the cases it could happen that due to different reasons you cannot do some of the payments that you agreed for the loan. Also, if you have a default it is probably that you cannot pay the loan or the mortgage but not so sure with the deposit, so maybe in future models we will see an independence between deposit and default.
+
+Therefore we are going to fit now a model deleting that dependency and see if that dependency was important or not.
+
+```{r,out.width="50%",fig.align='center'}
+m1=dmod(~default*housing+default*loan+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+m1
+plot(m1)
 ```
 
-```{r}
-m1=dmod(~default*housing*deposit+default*loan*deposit,data=back_bank)
+As it can be seen we no longer have that dependency between deposit and default. However, neither the AIC or BIC have improved against the first model fitted. Therefore, we could say that this relation is indeed important.
+
+We are going to keep fitting different models and see it dependencies. Later on we will take a table summarizing both AIC and BIC measures to determine which model fits better our data.
+
+We now build a model without the loan and deposit connection. Which probably won't make sense as it might be mandatory to have a deposit in the bank before applying for a loan.
+
+```{r,out.width="50%",fig.align='center'}
+m2=dmod(~default*housing*deposit+default*housing*loan,data=back_bank)
 plot(m2)
 ```
 
-```{r}
-m2=dmod(~default*housing*deposit+housing*loan*deposit,data=back_bank)
-plot(m2)
-```
+Now let's try another one but deleting the connection with housing and loan, which could make sense as it might be very risky for a bank to have both a loan and a mortgage with the same individual.
 
-```{r}
-m3=dmod(~default*housing+default*loan+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+```{r,out.width="50%",fig.align='center'}
+m3=dmod(~default*housing*deposit+default*loan*deposit,data=back_bank)
 plot(m3)
 ```
 
-```{r}
-m4=dmod(~default*loan+default*deposit+housing*loan+housing*deposit+deposit*loan,data=back_bank)
+Now let's try isolating some variables. Let's see how it works with the deposit one.
+
+```{r,out.width="50%",fig.align='center'}
+m4=dmod(~default*housing*loan+deposit,data=back_bank)
 plot(m4)
 ```
 
+And then the default one, as might not be the best case as you probably need to have at least have something to pay in order to have a default.
 
-```{r}
-m5=dmod(~defaul*loan*deposit+housing*loan*default,data=back_bank)
+```{r,out.width="50%",fig.align='center'}
+m5=dmod(~housing*loan*deposit+default,data=back_bank)
 plot(m5)
 ```
 
+Now, let's try another model to see if the defaults are related with the loans. 
 
-```{r}
-m6=dmod(~default*housing*loan+deposit,data=back_bank)
+```{r,out.width="50%",fig.align='center'}
+m6=dmod(~housing*loan*deposit+default*loan,data=back_bank)
 plot(m6)
 ```
 
-```{r}
-m7=dmod(~default*housing*deposit+loan,data=back_bank)
+Now we are going to fit much easier models with just pair of connection to see how those work with our data. Lets start first by fitting one with a dependency between loan and default in one side and deposit with hosusing in the other.
+
+```{r,out.width="50%",fig.align='center'}
+m7=dmod(~default*loan+deposit*housing,data=back_bank)
 plot(m7)
 ```
 
-```{r}
-m8=dmod(~housing*loan*deposit+default,data=back_bank)
+And finally another one with total independence between all the variables.
+
+```{r,out.width="50%",fig.align='center'}
+m8=dmod(~default+loan+deposit+housing,data=back_bank)
 plot(m8)
 ```
 
-```{r}
-m9=dmod(~default*loan*deposit+housing,data=back_bank)
-plot(m9)
-```
+We are now going to build a table to summarize all the models that we have fitted and look for the best one of them.
 
 ```{r}
-m10=dmod(~default*housing+housing*loan+housing*deposit+deposit*loan,data=back_bank)
-plot(m10)
-```
+Aic=c(mt$fitinfo$aic,m1$fitinfo$aic,m2$fitinfo$aic,m3$fitinfo$aic,
+      m4$fitinfo$aic,m5$fitinfo$aic,m6$fitinfo$aic,m7$fitinfo$aic,m8$fitinfo$aic)
 
-```{r}
-m11=dmod(~housing*loan*deposit+default*loan,data=back_bank)
-plot(m11)
-```
+Bic=c(mt$fitinfo$bic,m1$fitinfo$bic,m2$fitinfo$bic,m3$fitinfo$bic,
+      m4$fitinfo$bic,m5$fitinfo$bic,m6$fitinfo$bic,m7$fitinfo$bic,m8$fitinfo$bic)
 
-```{r}
-m12=dmod(~housing*loan*deposit+default*deposit,data=back_bank)
-plot(m12)
-```
-
-
-```{r}
-m13=dmod(~default*housing*loan+deposit*default,data=back_bank)
-plot(m13)
-```
-
-```{r}
-m14=dmod(~default*housing*loan+deposit*housing,data=back_bank)
-plot(m14)
-```
-
-```{r}
-m15=dmod(~default*housing*loan+deposit*loan,data=back_bank)
-plot(m15)
-```
-
-```{r}
-m16=dmod(~default*housing*deposit+loan*default,data=back_bank)
-plot(m16)
-```
-
-```{r}
-m17=dmod(~default*housing*deposit+loan*deposit,data=back_bank)
-plot(m17)
-```
-
-```{r}
-m18=dmod(~default*housing*deposit+loan*housing,data=back_bank)
-plot(m18)
-```
-
-```{r}
-m19=dmod(~default*loan*deposit+housing*loan,data=back_bank)
-plot(m19)
-```
-
-```{r}
-m20=dmod(~default*loan*deposit+housing*deposit,data=back_bank)
-plot(m20)
-```
-
-```{r}
-m21=dmod(~default*loan*deposit+housing*default,data=back_bank)
-plot(m21)
-```
-
-```{r}
-m22=dmod(~default*loan+deposit*housing,data=back_bank)
-plot(m22)
-```
-
-
-```{r}
-m23=dmod(~default*deposit+loan*housing,data=back_bank)
-plot(m23)
-```
-
-```{r}
-m24=dmod(~default*housing+deposit*loan,data=back_bank)
-plot(m24)
-```
-
-```{r}
-m25=dmod(~default*housing+loan+deposit,data=back_bank)
-plot(m25)
-```
-
-```{r}
-m26=dmod(~default*loan+housing+deposit,data=back_bank)
-plot(m26)
-```
-
-```{r}
-m27=dmod(~default*deposit+housing+loan,data=back_bank)
-plot(m27)
-```
-
-```{r}
-m28=dmod(~loan*housing+default+deposit,data=back_bank)
-plot(m28)
-```
-
-```{r}
-m29=dmod(~loan*deposit+housing+default,data=back_bank)
-plot(m29)
-```
-
-```{r}
-m30=dmod(~housing*deposit+loan+default,data=back_bank)
-plot(m30)
-```
-
-
-```{r}
-m31=dmod(~default+housing+loan+deposit,data=back_bank)
-plot(m31)
-```
-
-
-
-
-```{r}
-Aic=c(m1$fitinfo$aic,m2$fitinfo$aic,m3$fitinfo$aic,m4$fitinfo$aic,m5$fitinfo$aic,m6$fitinfo$aic,m7$fitinfo$aic,m8$fitinfo$aic,m9$fitinfo$aic,m10$fitinfo$aic,m11$fitinfo$aic,m12$fitinfo$aic,m13$fitinfo$aic,m14$fitinfo$aic,m15$fitinfo$aic,m16$fitinfo$aic,m17$fitinfo$aic,m18$fitinfo$aic,m19$fitinfo$aic,m20$fitinfo$aic)
-
-Bic=c(m1$fitinfo$bic,m2$fitinfo$bic,m3$fitinfo$bic,m4$fitinfo$bic,m5$fitinfo$bic,m6$fitinfo$bic,m7$fitinfo$bic,m8$fitinfo$bic,m9$fitinfo$bic,m10$fitinfo$bic,m11$fitinfo$bic,m12$fitinfo$bic,m13$fitinfo$bic,m14$fitinfo$bic,m15$fitinfo$bic,m16$fitinfo$bic,m17$fitinfo$bic,m18$fitinfo$bic,m19$fitinfo$bic,m20$fitinfo$bic)
-
-logL=c(m1$fitinfo$logL,m2$fitinfo$logL,m3$fitinfo$logL,m4$fitinfo$logL,m5$fitinfo$logL,m6$fitinfo$logL,m7$fitinfo$logL,m8$fitinfo$logL,m9$fitinfo$logL,m10$fitinfo$logL,m11$fitinfo$logL,m12$fitinfo$logL,m13$fitinfo$logL,m14$fitinfo$logL,m15$fitinfo$logL,m16$fitinfo$logL,m17$fitinfo$logL,m18$fitinfo$logL,m19$fitinfo$logL,m20$fitinfo$logL)
+logL=c(mt$fitinfo$logL,m1$fitinfo$logL,m2$fitinfo$logL,m3$fitinfo$logL,
+       m4$fitinfo$logL,m5$fitinfo$logL,m6$fitinfo$logL,m7$fitinfo$logL,m8$fitinfo$logL)
 
 resume=data.frame(logL,Aic,Bic)
-which.min(resume$Aic)
-which.min(resume$Bic) 
-order(resume$Bic)
+resume
 ```
 
-
+First of all we are going to focus on the AIC measure.
 
 ```{r}
+which.min(resume$Aic)
+```
+
+According to the AIC, the best model is the one with all the interactions between them, which makes sense as we explained before. All of these variables are very related between them in a financial institution. Also, for the best graphical model, this one is the best one.
+
+Then, focusing on the BIC:
+
+```{r}
+which.min(resume$Bic)
+```
+
+For this criteria we are getting that the best model is the sevent one. Recall that the plot for this model was:
+
+```{r,out.width="50%",fig.align='center'}
+plot(m6)
+```
+
+As it can be seen, it explains the dependency of default with just the variable loan. Meaning that, most of the defaults are for loan payments, which makes sense at all. Also it includes that for both loans and housing, it is common to have a deposit.
+
+We have fitted several models (9) and we have obtained different solutions. Even though both of them makes sense we still have 55 models left that we did not calculate. It could happen that between those, the solutions obtained are better than the ones that we have already obtained. Therefore, we are going to compute now stepwise selection, both forward and backward to see if we can obtain better results or not.
+
+Let's first start with AIC in both backward selection and forward selection
+
+```{r,results=FALSE}
 msat <- dmod(~.^.,data=back_bank)
 mbaic <- backward(msat)
-plot(mbaic)
-```
-
-```{r}
 mmain <- dmod(~.^1,data=back_bank)
 mfaic <- forward(mmain)
-plot(mfaic)
 ```
 
-```{r}
-msat <- dmod(~.^.,data=back_bank)
+And now let's do the same with BIC:
+
+```{r,results=FALSE}
+msat2 <- dmod(~.^.,data=back_bank)
 mbbic <- backward(msat,k=log(sum(back_bank)))
-plot(mbbic)
-mmain <- dmod(~.^1,data=back_bank)
+mmain2 <- dmod(~.^1,data=back_bank)
 mfbic <- forward(mmain,k=log(sum(back_bank)))
+```
+
+We can also search without the restriction to decomposable models. The fitted decomposable and unrestricted models do not always have the same graphs
+
+```{r}
+par(mfrow=c(2,4))
+mbaic_unrestricted <- backward(msat,type="unrestricted")
+plot(mbaic)
+plot(mbaic_unrestricted)
+mfaic_unrestricted <- forward(mmain,type="unrestricted")
+plot(mfaic)
+plot(mfaic_unrestricted)
+mbbic_unrestricted <- backward(msat,type="unrestricted",k=log(sum(back_bank)))
+plot(mbbic)
+plot(mbbic_unrestricted)
+mfbic_unrestricted <- forward(mmain,type="unrestricted",k=log(sum(back_bank)))
 plot(mfbic)
+plot(mfbic_unrestricted)
 ```
 
+We can see that the plots obtained for are the sames as the one obtained before doing the step wise selection, both for the AIC and BIC respectively.
+
+We have explained already explained the relation with the variables in the graphical representation before, so we are now going to carry out a goodness fit test to see whether the models selected fits the data or not.
+
+# Goodness of fit test
+
+We are now going to check if the models fits the data or not. We are going to include all the models that we have considered as good models since we started. That is those obtained with the stepwise selection for AIC and BIC measures including the unrestricted cases and the first two models that we fitted at the beginning.
 
 ```{r}
-mbaic$fitinfo$aic
-mfaic$fitinfo$aic
-mbbic$fitinfo$bic
-mfbic$fitinfo$bic
+pchisq(mt$fitinfo$dev,mt$fitinfo$dimension[4])
+pchisq(m6$fitinfo$dev,m6$fitinfo$dimension[4])
+pchisq(mbaic$fitinfo$dev,mbaic$fitinfo$dimension[4])
+pchisq(mfaic$fitinfo$dev,mfaic$fitinfo$dimension[4])
+pchisq(mbbic$fitinfo$dev,mbbic$fitinfo$dimension[4])
+pchisq(mfbic$fitinfo$dev,mfbic$fitinfo$dimension[4]) 
+pchisq(mbaic_unrestricted$fitinfo$dev,mbaic$fitinfo$dimension[4])
+pchisq(mfaic_unrestricted$fitinfo$dev,mfaic$fitinfo$dimension[4])
+pchisq(mbbic_unrestricted$fitinfo$dev,mbbic$fitinfo$dimension[4])
+pchisq(mfbic_unrestricted$fitinfo$dev,mfbic$fitinfo$dimension[4])
 ```
 
 
-# Dependence graph of a log-linear model
+As we can see we are obtaining the same results for each model selected with AIC and each one selected with BIC, therefore we can say that the models obtained were the same. However, we can also see that for AIC we are obtaining a p-value of 0, which is less than 0.05. Therefore we can see that for those models selected with the AIC measure we can reject the independence between variables.
 
-```{r}
-m1 <- dmod(~default*housing+housing*loan+loan*deposit,
-           data=data_bank) #2 way interactions
-plot(m1)
-summary(m1)
-```
+In the other hand, for models selected with BIC, the p-value is above 0.05, therefore we can say that there exist an independence between some variables.
+
+# Conclusions
+ 
+Through this whole analysis we have learn how to apply log-linear graphical model to see how different binary variables are related between them. This has definitely been a great exercise to practice and to better understand how this model works.
+
+It has also been very interesting to figure out whether the dependencies obtained were reasonable or not, and indeed they were (at least for my very poor knowledge about banking procedures). 
+
+It would have also been very cool to see a dataset with variables that were not that directly related so the different graphs obtained could really change a lot from the satured model.
+
+Finally, learning these tools have been a really good experience as it is very useful to carry out analysis between several binary variables which is something that we haven't learned before.
+
+
+
 
 
 
