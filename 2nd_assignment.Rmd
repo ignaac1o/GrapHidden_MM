@@ -1,0 +1,57 @@
+---
+title: "2nd_assignment"
+author: "Ignacio Almodóvar Cárdenas"
+date: '2022-05-18'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(magrittr)
+```
+
+Load data
+
+```{r}
+data=read.csv("drug200.csv")
+summary(data)
+table(data$Drug)
+```
+
+We are now going to create dummy variables to work better with our data and to be able to display a correct markov model.
+
+```{r}
+# Create dummy variable
+data$DrugY <- ifelse(data$Drug == "DrugY", 1, 0)
+data$DrugC <- ifelse(data$Drug == "drugC", 1, 0)
+data$DrugA <- ifelse(data$Drug == "drugA", 1, 0)
+data$DrugB <- ifelse(data$Drug == "drugB", 1, 0)
+data$DrugX <- ifelse(data$Drug == "drugX", 1, 0)
+```
+
+```{r}
+table(data$DrugY)
+```
+
+
+Try to find an algorithm to show how graph is built
+
+```{r}
+iambex <- iamb(data)
+iambex
+plot(iambex)
+#
+# Score based methods.
+#
+hcex <- hc(data)
+hcex
+plot(hcex)
+#
+# Hybrid algorithm.
+#
+mmex <- mmhc(data)
+mmex
+plot(mmex)
+```
+
